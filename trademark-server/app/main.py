@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.infrastructure.database.connection import create_db_and_tables
+from app.interfaz.api.routes import trademark_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,3 +26,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(trademark_routes.router, prefix="/api/v1", tags=["trademarks"])
