@@ -27,19 +27,19 @@ Sistema para la gestión de marcas comerciales desarrollado con Next.js (Fronten
    pip install -r requirements.txt
    ```
 
+4. Variables de Entorno - Backend
+
+   Crea un archivo `.env` en el directorio del backend con las siguientes variables:
+
+   ```
+   DATABASE_URL=sqlite:///db.sqlite3
+   ```  
+
 5. Inicia el servidor de desarrollo:
    ```bash
    fastapi dev app/main.py
    ```
    El servidor estará disponible en http://localhost:8000
-
-## Variables de Entorno - Backend
-
-Crea un archivo `.env` en el directorio del backend con las siguientes variables:
-
-```
-DATABASE_URL=sqlite:///db.sqlite3
-```
 
 ## Configuración del Frontend
 
@@ -55,7 +55,15 @@ DATABASE_URL=sqlite:///db.sqlite3
    pnpm install
    ```
 
-3. Inicia el servidor de desarrollo:
+3. Variables de Entorno - Frontend
+
+   Crea un archivo `.env` en el directorio del backend con las siguientes variables:
+
+   ```
+   NEXT_PUBLIC_SERVER_HOST=http://127.0.0.1:8000
+   ```
+
+4. Inicia el servidor de desarrollo:
    ```bash
    yarn dev
    # o
@@ -63,21 +71,14 @@ DATABASE_URL=sqlite:///db.sqlite3
    ```
    La aplicación estará disponible en http://localhost:3000
 
-## Variables de Entorno - Frontend
-
-Crea un archivo `.env` en el directorio del backend con las siguientes variables:
-
-```
-NEXT_PUBLIC_SERVER_HOST=http://127.0.0.1:8000
-```
 
 ## Poblar la Base de Datos
 
 Se incluye un script para poblar la base de datos con marcas de ejemplo. Ejecuta:
 
 ```bash
-# Desde el directorio raíz del proyecto
-python scripts/seed_database.py
+# Desde el directorio trademark-server
+python seed_database.py
 ```
 
 ## Estructura del Proyecto
