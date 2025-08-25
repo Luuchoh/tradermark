@@ -30,7 +30,7 @@ export interface AppState {
   getAllTrademarks: () => Promise<void>
   createTrademark: (trademark: TrademarkCreate) => Promise<Trademark>
   updateTrademark: (trademark_id: string, trademark: TrademarkUpdate) => Promise<Trademark>
-  deleteTrademark: (trademark_id: string) => Promise<Trademark>
+  deleteTrademark: (trademark_id: string) => Promise<void>
   getOneTrademarkById: (trademark_id: string) => Promise<Trademark>
   getOneTrademarkByBrand: (brand_name: string) => Promise<Trademark>
 }
@@ -81,9 +81,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_HOST}/api/v1/trademarks/${trademark_id}`, {
       method: "DELETE",
     })
-    if (!res.ok) throw new Error("No se pudo eliminar la marca")
-    const data = await res.json()
-    return data as Trademark
+    if (res.status !== 204) throw new Error("No se pudo eliminar la marca")
   },
   
   getOneTrademarkById: async (trademark_id: string) => {
