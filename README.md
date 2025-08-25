@@ -2,11 +2,21 @@
 
 Sistema para la gestión de marcas comerciales desarrollado con Next.js (Frontend) y FastAPI (Backend).
 
+
 ## Requisitos Previos
 
 - Node.js 18+ (para el frontend)
 - Python 3.11+ (para el backend)
 - SQLite (incluido en Python)
+
+## Empezando
+
+Para obtener una copia local del proyecto, ejecuta:
+
+```bash
+git clone https://github.com/Luuchoh/tradermark.git
+cd tradermark
+```
 
 ## Configuración del Backend
 
