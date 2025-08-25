@@ -1,2 +1,5 @@
 fastapi['standard']==0.116.1
 sqlmodel==0.0.24
+pytest==8.4.1
+pytest-asyncio==1.1.0
+python-dotenv==1.1.1
