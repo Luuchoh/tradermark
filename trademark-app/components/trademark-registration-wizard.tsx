@@ -15,14 +15,14 @@ interface WizardProps {
 
 interface FormData {
   marca: string
-  titular: string
+  titulo: string
 }
 
 export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<FormData>({
     marca: "",
-    titular: "",
+    titulo: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { createTrademark, getAllTrademarks } = useAppStore()
@@ -30,7 +30,7 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
 
   const steps = [
     { number: 1, title: "Información de la Marca", description: "Datos básicos de la marca a registrar" },
-    { number: 2, title: "Información del Titular", description: "Datos del propietario de la marca" },
+    { number: 2, title: "Información del Titulo", description: "Eslogan de la marca" },
     { number: 3, title: "Resumen", description: "Verificación de datos ingresados" },
   ]
 
@@ -51,7 +51,7 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
       setIsSubmitting(true)
       await createTrademark({
         brand_name: formData.marca,
-        title: formData.titular,
+        title: formData.titulo,
         status: "enabled",
       })
       await getAllTrademarks()
@@ -146,14 +146,14 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <Label htmlFor="titular" className="text-base font-medium">
-                      Titular de la marca
+                    <Label htmlFor="titulo" className="text-base font-medium">
+                      Titulo de la marca
                     </Label>
                     <Input
-                      id="titular"
-                      value={formData.titular}
-                      onChange={(e) => updateFormData("titular", e.target.value)}
-                      placeholder="Ingrese el nombre del titular"
+                      id="titulo"
+                      value={formData.titulo}
+                      onChange={(e) => updateFormData("titulo", e.target.value)}
+                      placeholder="Ingrese el nombre del titulo"
                       className="mt-2"
                     />
                   </div>
@@ -171,8 +171,8 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
                       <p className="text-base font-medium">{formData.marca || "No especificado"}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-muted-foreground">Titular de la marca</Label>
-                      <p className="text-base font-medium">{formData.titular || "No especificado"}</p>
+                      <Label className="text-sm font-medium text-muted-foreground">Titulo de la marca</Label>
+                      <p className="text-base font-medium">{formData.titulo || "No especificado"}</p>
                     </div>
                   </div>
                 </div>
@@ -198,7 +198,7 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
               {currentStep < 3 ? (
                 <Button
                   onClick={handleNext}
-                  disabled={(currentStep === 1 && !formData.marca) || (currentStep === 2 && !formData.titular)}
+                  disabled={(currentStep === 1 && !formData.marca) || (currentStep === 2 && !formData.titulo)}
                   className="bg-primary hover:bg-primary/90"
                 >
                   Continuar
