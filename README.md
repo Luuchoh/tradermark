@@ -28,8 +28,12 @@ cd tradermark
 2. Crea y activa un entorno virtual (recomendado):
    ```bash
    python -m venv venv
-   .\venv\Scripts\activate  # En Windows
-   # O en Linux/Mac: source venv/bin/activate
+
+   # En Windows
+   .\venv\Scripts\activate
+
+   # En Linux/Mac: 
+   source venv/bin/activate
    ```
 
 3. Instala las dependencias:
@@ -84,7 +88,7 @@ cd tradermark
 
 ## Poblar la Base de Datos
 
-Se incluye un script para poblar la base de datos con marcas de ejemplo. Ejecuta:
+Se incluye un script para poblar la base de datos con marcas de ejemplo. `Ejecuta en otra terminal`:
 
 ```bash
 # Desde el directorio trademark-server
