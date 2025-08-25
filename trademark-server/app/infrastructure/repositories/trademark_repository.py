@@ -1,6 +1,6 @@
 from typing import List, Optional
 from sqlmodel import Session, select
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from app.domain.models.trademark import Trademark, TrademarkCreate, TrademarkUpdate
 from app.domain.interfaces.trademark_interface import TrademarkRepositoryInterface
 
@@ -32,7 +32,7 @@ class TrademarkRepository(TrademarkRepositoryInterface):
         for field, value in update_data.items():
             setattr(trademark, field, value)
         
-        trademark.updated_at = datetime.utcnow()
+        trademark.updated_at = datetime.now(timezone(timedelta(hours=-5)))
         self.session.add(trademark)
         self.session.commit()
         self.session.refresh(trademark)

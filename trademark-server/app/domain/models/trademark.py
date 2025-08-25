@@ -1,7 +1,8 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from enum import Enum
+
 
 class TrademarkStatus(str, Enum):
     ENABLED = "enabled"
@@ -16,8 +17,8 @@ class Trademark(TrademarkBase, table=True):
     __tablename__ = "trademarks"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(hours=-5))))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(hours=-5))))
 
 class TrademarkCreate(TrademarkBase):
     pass
