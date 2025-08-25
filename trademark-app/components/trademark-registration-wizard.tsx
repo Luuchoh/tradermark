@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, ArrowRight, Check, Building2 } from "lucide-react"
+import { useAppStore } from "@/store/useAppStore"
+import { useToast } from "@/hooks/use-toast"
 
 interface WizardProps {
   onClose: () => void
@@ -22,6 +24,9 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
     marca: "",
     titular: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { createTrademark, getAllTrademarks } = useAppStore()
+  const { toast } = useToast()
 
   const steps = [
     { number: 1, title: "Información de la Marca", description: "Datos básicos de la marca a registrar" },
@@ -41,11 +46,22 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
     }
   }
 
-  const handleSubmit = () => {
-    // Here you would typically send the data to your API
-    console.log("Submitting trademark registration:", formData)
-    alert("¡Registro de marca creado exitosamente!")
-    onClose()
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true)
+      await createTrademark({
+        brand_name: formData.marca,
+        title: formData.titular,
+        status: "enabled",
+      })
+      await getAllTrademarks()
+      toast({ title: "Registro creado", description: `La marca "${formData.marca}" fue creada correctamente.` })
+      onClose()
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "No se pudo crear el registro", variant: "destructive" })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const updateFormData = (field: keyof FormData, value: string) => {
@@ -189,8 +205,8 @@ export function TrademarkRegistrationWizard({ onClose }: WizardProps) {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
-                <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
-                  Crear
+                <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
+                  {isSubmitting ? "Creando..." : "Crear"}
                 </Button>
               )}
             </div>
