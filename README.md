@@ -57,7 +57,7 @@ cd tradermark
 
 ## Configuración del Frontend
 
-1. Navega al directorio del frontend:
+1. Abre otra terminal y navega al directorio del frontend:
    ```bash
    cd trademark-app
    ```
@@ -88,12 +88,16 @@ cd tradermark
 
 ## Poblar la Base de Datos
 
-Se incluye un script para poblar la base de datos con marcas de ejemplo. `Ejecuta en otra terminal`:
+Se incluye un script para poblar la base de datos con marcas de ejemplo. Ejecuta en otra terminal:
 
 ```bash
+cd trademark-server
+
 # Desde el directorio trademark-server
 python seed_database.py
 ```
+
+Ya puedes cerrar la terminal que ejecuto el Script. Recarga la pagina del localhost:3000 para ver los cambios.
 
 ## Estructura del Proyecto
 
