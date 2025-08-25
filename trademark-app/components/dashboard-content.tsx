@@ -1,85 +1,49 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Search, MoreHorizontal, Edit, Trash2, CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { Search, MoreHorizontal, Edit, Trash2, CheckCircle, AlertCircle } from "lucide-react"
+import { useAppStore } from "@/store/useAppStore"
 
-// Mock data for existing trademarks
-const mockTrademarks = [
-  {
-    id: 1,
-    marca: "TechCorp Solutions",
-    titular: "Juan Pérez García",
-    estado: "Aprobada",
-    fechaRegistro: "2024-01-15",
-    acciones: ["Actualizar", "Eliminar"],
-  },
-  {
-    id: 2,
-    marca: "Innovate Pro",
-    titular: "María González López",
-    estado: "En Proceso",
-    fechaRegistro: "2024-02-20",
-    acciones: ["Actualizar", "Eliminar"],
-  },
-  {
-    id: 3,
-    marca: "Digital Ventures",
-    titular: "Carlos Rodríguez Martín",
-    estado: "Pendiente",
-    fechaRegistro: "2024-03-10",
-    acciones: ["Actualizar", "Eliminar"],
-  },
-  {
-    id: 4,
-    marca: "Creative Studio",
-    titular: "Ana Fernández Silva",
-    estado: "Aprobada",
-    fechaRegistro: "2024-01-28",
-    acciones: ["Actualizar", "Eliminar"],
-  },
-]
-
-const getStatusBadge = (estado: string) => {
-  switch (estado) {
-    case "Aprobada":
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "enabled":
       return (
         <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
           <CheckCircle className="w-3 h-3 mr-1" />
-          Aprobada
+          Habilitada
         </Badge>
       )
-    case "En Proceso":
+    case "disabled":
       return (
         <Badge variant="secondary">
-          <Clock className="w-3 h-3 mr-1" />
-          En Proceso
-        </Badge>
-      )
-    case "Pendiente":
-      return (
-        <Badge variant="outline">
           <AlertCircle className="w-3 h-3 mr-1" />
-          Pendiente
+          Deshabilitada
         </Badge>
       )
     default:
-      return <Badge variant="outline">{estado}</Badge>
+      return <Badge variant="outline">{status}</Badge>
   }
 }
 
 export function DashboardContent() {
   const [searchTerm, setSearchTerm] = useState("")
+  const { trademarks, loading, error, getAllTrademarks, deleteTrademark, updateTrademark } = useAppStore()
 
-  const filteredTrademarks = mockTrademarks.filter(
+  useEffect(() => {
+    getAllTrademarks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const filteredTrademarks = trademarks.filter(
     (trademark) =>
-      trademark.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trademark.titular.toLowerCase().includes(searchTerm.toLowerCase()),
+      trademark.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trademark.title.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   return (
@@ -91,29 +55,25 @@ export function DashboardContent() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Registros</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{mockTrademarks.length}</div>
+            <div className="text-2xl font-bold text-foreground">{trademarks.length}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Aprobadas</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Habilitadas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">
-              {mockTrademarks.filter((t) => t.estado === "Aprobada").length}
-            </div>
+            <div className="text-2xl font-bold text-emerald-600">{trademarks.filter((t) => t.status === "enabled").length}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">En Proceso</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Deshabilitadas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600">
-              {mockTrademarks.filter((t) => t.estado === "En Proceso" || t.estado === "Pendiente").length}
-            </div>
+            <div className="text-2xl font-bold text-amber-600">{trademarks.filter((t) => t.status === "disabled").length}</div>
           </CardContent>
         </Card>
       </div>
@@ -138,11 +98,13 @@ export function DashboardContent() {
         </CardHeader>
 
         <CardContent>
+          {loading && <div className="text-sm text-muted-foreground py-4">Cargando marcas...</div>}
+          {error && <div className="text-sm text-red-600 py-2">Error: {error}</div>}
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="font-[family-name:var(--font-work-sans)]">Marca</TableHead>
-                <TableHead className="font-[family-name:var(--font-work-sans)]">Titular</TableHead>
+                <TableHead className="font-[family-name:var(--font-work-sans)]">Titulo</TableHead>
                 <TableHead className="font-[family-name:var(--font-work-sans)]">Estado</TableHead>
                 <TableHead className="font-[family-name:var(--font-work-sans)]">Fecha Registro</TableHead>
                 <TableHead className="font-[family-name:var(--font-work-sans)]">Acciones</TableHead>
@@ -151,10 +113,10 @@ export function DashboardContent() {
             <TableBody>
               {filteredTrademarks.map((trademark) => (
                 <TableRow key={trademark.id}>
-                  <TableCell className="font-medium">{trademark.marca}</TableCell>
-                  <TableCell>{trademark.titular}</TableCell>
-                  <TableCell>{getStatusBadge(trademark.estado)}</TableCell>
-                  <TableCell>{new Date(trademark.fechaRegistro).toLocaleDateString("es-ES")}</TableCell>
+                  <TableCell className="font-medium">{trademark.brand_name}</TableCell>
+                  <TableCell>{trademark.title}</TableCell>
+                  <TableCell>{getStatusBadge(trademark.status)}</TableCell>
+                  <TableCell>{new Date(trademark.created_at).toLocaleDateString("es-ES")}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -163,11 +125,35 @@ export function DashboardContent() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            try {
+                              await updateTrademark(
+                                trademark.id,
+                                { status: trademark.status === "enabled" ? "disabled" : "enabled" }
+                              )
+                              await getAllTrademarks()
+                            } catch (e) {
+                              console.error(e)
+                            }
+                          }}
+                        >
                           <Edit className="mr-2 h-4 w-4" />
-                          Actualizar
+                          Alternar estado
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={async () => {
+                            try {
+                              if (confirm("¿Deseas eliminar esta marca?")) {
+                                await deleteTrademark(trademark.id)
+                                await getAllTrademarks()
+                              }
+                            } catch (e) {
+                              console.error(e)
+                            }
+                          }}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Eliminar
                         </DropdownMenuItem>
