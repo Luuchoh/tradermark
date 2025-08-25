@@ -7,8 +7,98 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Search, MoreHorizontal, Edit, Trash2, CheckCircle, AlertCircle } from "lucide-react"
+import { Search, MoreHorizontal, Edit, Trash2, CheckCircle, AlertCircle, Check, X } from "lucide-react"
 import { useAppStore } from "@/store/useAppStore"
+import { useToast } from "@/hooks/use-toast"
+
+interface EditableCellProps {
+  value: string
+  onSave: (newValue: string) => Promise<void>
+  className?: string
+}
+
+const EditableCell = ({ value, onSave, className = "" }: EditableCellProps) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [inputValue, setInputValue] = useState(value)
+  const [isSaving, setIsSaving] = useState(false)
+  const { toast } = useToast()
+
+  const handleSave = async () => {
+    if (inputValue.trim() === value) {
+      setIsEditing(false)
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      await onSave(inputValue)
+      setIsEditing(false)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el campo",
+        variant: "destructive",
+      })
+      setInputValue(value) // Revert to original value on error
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave()
+    } else if (e.key === 'Escape') {
+      setInputValue(value)
+      setIsEditing(false)
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center space-x-2">
+        <Input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          autoFocus
+          disabled={isSaving}
+          className="h-8"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={handleSave}
+          disabled={isSaving}
+        >
+          <Check className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            setInputValue(value)
+            setIsEditing(false)
+          }}
+          disabled={isSaving}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div 
+      className={`cursor-pointer hover:bg-accent hover:text-accent-foreground px-2 py-1 rounded ${className}`}
+      onClick={() => setIsEditing(true)}
+    >
+      {value}
+    </div>
+  )
+}
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -34,6 +124,7 @@ const getStatusBadge = (status: string) => {
 export function DashboardContent() {
   const [searchTerm, setSearchTerm] = useState("")
   const { trademarks, loading, error, getAllTrademarks, deleteTrademark, updateTrademark } = useAppStore()
+  const { toast } = useToast()
 
   useEffect(() => {
     getAllTrademarks()
@@ -45,6 +136,24 @@ export function DashboardContent() {
       trademark.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       trademark.title.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  const handleUpdateField = async (id: string, field: 'brand_name' | 'title', value: string) => {
+    if (!value.trim()) {
+      toast({
+        title: "Error",
+        description: `El campo no puede estar vacío`,
+        variant: "destructive",
+      })
+      throw new Error("Field cannot be empty")
+    }
+    
+    await updateTrademark(id, { [field]: value })
+    await getAllTrademarks()
+    toast({
+      title: "Actualizado",
+      description: `El campo se ha actualizado correctamente`,
+    })
+  }
 
   return (
     <div className="space-y-8">
@@ -113,8 +222,18 @@ export function DashboardContent() {
             <TableBody>
               {filteredTrademarks.map((trademark) => (
                 <TableRow key={trademark.id}>
-                  <TableCell className="font-medium">{trademark.brand_name}</TableCell>
-                  <TableCell>{trademark.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <EditableCell
+                      value={trademark.brand_name}
+                      onSave={(newValue) => handleUpdateField(trademark.id, 'brand_name', newValue)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <EditableCell
+                      value={trademark.title}
+                      onSave={(newValue) => handleUpdateField(trademark.id, 'title', newValue)}
+                    />
+                  </TableCell>
                   <TableCell>{getStatusBadge(trademark.status)}</TableCell>
                   <TableCell>{new Date(trademark.created_at).toLocaleDateString("es-ES")}</TableCell>
                   <TableCell>
@@ -133,8 +252,17 @@ export function DashboardContent() {
                                 { status: trademark.status === "enabled" ? "disabled" : "enabled" }
                               )
                               await getAllTrademarks()
+                              toast({
+                                title: "Estado actualizado",
+                                description: `El estado se ha cambiado a ${trademark.status === "enabled" ? "deshabilitado" : "habilitado"}`,
+                              })
                             } catch (e) {
                               console.error(e)
+                              toast({
+                                title: "Error",
+                                description: "No se pudo actualizar el estado",
+                                variant: "destructive",
+                              })
                             }
                           }}
                         >
@@ -148,9 +276,18 @@ export function DashboardContent() {
                               if (confirm("¿Deseas eliminar esta marca?")) {
                                 await deleteTrademark(trademark.id)
                                 await getAllTrademarks()
+                                toast({
+                                  title: "Marca eliminada",
+                                  description: "La marca ha sido eliminada correctamente",
+                                })
                               }
                             } catch (e) {
                               console.error(e)
+                              toast({
+                                title: "Error",
+                                description: "No se pudo eliminar la marca",
+                                variant: "destructive",
+                              })
                             }
                           }}
                         >
